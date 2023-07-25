@@ -10,7 +10,7 @@ function App() {
   async function handleExcluirCaixa(id) {
     if (window.confirm('Confirma?')) { 
       try {
-        const response = await fetch(`${API_URL}/api/caixa/excluir/${id}`, {
+        const response = await fetch(`${API_URL}/api/caixas/${id}`, {
           method: 'DELETE',
         });
         if (!response.ok) {
@@ -29,7 +29,7 @@ function App() {
     const formData = new FormData(event.target);
     const tipo = formData.get('tipo');
     try {
-      const response = await fetch(`${API_URL}/api/caixa?tipo=${tipo}`);
+      const response = await fetch(`${API_URL}/api/caixas/resumo?tipo=${tipo}`);
       const data = await response.json();
       setDadosAPI(data);
     } catch (error) {
@@ -39,7 +39,7 @@ function App() {
 
   async function fetchData() {
     try {
-      const response = await fetch(`${API_URL}/api/caixa`);
+      const response = await fetch(`${API_URL}/api/caixas/resumo`);
       const data = await response.json();
       setDadosAPI(data);
     } catch (error) {
@@ -53,8 +53,9 @@ function App() {
     const tipo = formData.get('tipo');
     const valor = parseFloat(formData.get('valor'));
     const status = parseInt(formData.get('status'));
+
     try {
-      const response = await fetch(`${API_URL}/api/caixa/adicionar`, {
+      const response = await fetch(`${API_URL}/api/caixas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +80,7 @@ function App() {
     return <div>Loading...</div>;
   }
 
-  const { valorTotal, receitas, despesas, lista } = dadosAPI;
+  const { valorTotal, totalReceitas, totalDespesas, caixas } = dadosAPI;
 
   return (
     <div className="App">
@@ -97,11 +98,11 @@ function App() {
               </div>
               <div className="div-inline-block">
                 <b>Receitas</b><br />
-                R$ {receitas.toFixed(2)}
+                R$ {totalReceitas.toFixed(2)}
               </div>
               <div className="div-inline-block despesas">
                 <b>Despesas</b><br />
-                R$ {despesas.toFixed(2)}
+                R$ {totalDespesas.toFixed(2)}
               </div>
             </div>
 
@@ -132,8 +133,8 @@ function App() {
                 <div className="mb-3">
                   <label htmlFor="status" className="form-label">Status</label>
                   <select className="form-select" id="status" name="status" required>
-                    <option value="0">Entrada</option>
-                    <option value="1">Saída</option>
+                    <option value="0">DESPESA</option>
+                    <option value="1">RECEITA</option>
                   </select>
                 </div>
                 <button type="submit" className="btn btn-primary">Cadastrar</button>
@@ -151,15 +152,15 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {lista.map(caixa => (
+                {caixas.map(caixa => (
                   <tr key={caixa.id}>
                     <td>{caixa.tipo}</td>
                     <td>
-                      <span>{caixa.status === 1 ? '- ' : ''}R$ {caixa.valor.toFixed(2)}</span>
+                      <span>{caixa.status === "DESPESA" ? '- ' : ''}R$ {caixa.valor.toFixed(2)}</span>
                     </td>
-                    <td>{caixa.status === 1 ? "Saída" : "Entrada"}</td>
+                    <td>{caixa.status}</td>
                     <td>
-                      <div className={caixa.status === 1 ? "despesa-legenda" : "receita-legenda"}></div>
+                      <div className={caixa.status === "DESPESA" ? "despesa-legenda" : "receita-legenda"}></div>
                     </td>
                     <td style={{ width: "20px" }}>
                       <a href="#"onClick={() => handleExcluirCaixa(caixa.id)}>X</a>
